@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.util.Scanner;
 
 public class Main {
 
@@ -111,6 +112,121 @@ public class Main {
         }
     }
 
+    public void getNextYesNode(int currNode){
+
+        int yesNode = 0;
+        String sql = "SELECT yes "
+                + "FROM Tree WHERE id = ?";
+
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt  = conn.prepareStatement(sql)){
+
+            // set the value
+            pstmt.setInt(1,currNode);
+            //
+            ResultSet rs  = pstmt.executeQuery();
+
+            while(rs.next()) {
+                yesNode = rs.getInt("yes");
+            }
+
+
+            // TODO:loop through the result set
+//            while (rs.next()) {
+//                System.out.println(rs.getInt("id") +  "\t" +
+//                        rs.getString("name") + "\t" +
+//                        rs.getDouble("capacity"));
+//            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+
+        String sql2 = "SELECT id, hasAnswer, yes, no, question "
+                + "FROM Tree WHERE id = ?";
+
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt  = conn.prepareStatement(sql2)){
+
+            // set the value
+            pstmt.setInt(1,yesNode);
+            //
+            ResultSet rs  = pstmt.executeQuery();
+
+            while(rs.next()) {
+                if (rs.getInt("hasAnswer") == 1)
+                    System.out.println(rs.getString("question"));
+                else if (rs.getInt("hasAnswer") == 0)
+                    System.out.println("Is it " + rs.getString("question") + "?");
+            }
+
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+
+
+    }
+
+
+    public void getNextNoNode(int currNode){
+
+        int noNode = 0;
+        String sql = "SELECT no "
+                + "FROM Tree WHERE id = ?";
+
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt  = conn.prepareStatement(sql)){
+
+            // set the value
+            pstmt.setInt(1,currNode);
+            //
+            ResultSet rs  = pstmt.executeQuery();
+
+            while(rs.next()) {
+                noNode = rs.getInt("no");
+            }
+
+
+            // TODO:loop through the result set
+//            while (rs.next()) {
+//                System.out.println(rs.getInt("id") +  "\t" +
+//                        rs.getString("name") + "\t" +
+//                        rs.getDouble("capacity"));
+//            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+
+        String sql2 = "SELECT id, hasAnswer, yes, no, question "
+                + "FROM Tree WHERE id = ?";
+
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt  = conn.prepareStatement(sql2)){
+
+            // set the value
+            pstmt.setInt(1,noNode);
+            //
+            ResultSet rs  = pstmt.executeQuery();
+
+            while(rs.next()) {
+                if (rs.getInt("hasAnswer") == 1)
+                    System.out.println(rs.getString("question"));
+                else if (rs.getInt("hasAnswer") == 0)
+                    System.out.println("Is it " + rs.getString("question") + "?");
+            }
+
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+
+
+    }
+
     /**
      * @param args the command line arguments
      */
@@ -121,7 +237,25 @@ public class Main {
 
         //demo.insert(1,1,2,3, "Dog");
         demo.selectAll();
-        demo.update(1,0,3,5,"Cat");
+//        demo.update(1,0,3,5,"Cat");
+//        demo.selectAll();
+        //firstMenu(demo);
+
+        //demo.update(1,1,2,3, "Is it a guy?");
+        demo.getNextYesNode(1);
+        demo.getNextNoNode(1);
+    }
+
+
+    public static void firstMenu(Main demo){
+        Scanner cin = new Scanner(System.in);
+        System.out.println("Please enter the first answer: ");
+        String answer = cin.nextLine();
+        System.out.println("Please enter the questions to \" "+ answer +" \": ");
+        String question = cin.nextLine();
+        demo.update(1,1,2,0,question);
+        demo.update(2,0,0,0,answer);
         demo.selectAll();
+
     }
 }
