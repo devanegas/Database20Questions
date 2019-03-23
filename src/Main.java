@@ -160,12 +160,6 @@ public class Main {
             //
             ResultSet rs  = pstmt.executeQuery();
 
-//            while(rs.next()) {
-//                if (rs.getInt("hasAnswer") == 1)
-//                    System.out.println(rs.getString("question"));
-//                else if (rs.getInt("hasAnswer") == 0)
-//                    System.out.println("Is it " + rs.getString("question") + "?");
-//            }
 
 
         } catch (SQLException e) {
@@ -294,12 +288,6 @@ public class Main {
             //
             ResultSet rs  = pstmt.executeQuery();
 
-//            while(rs.next()) {
-//                if (rs.getInt("hasAnswer") == 1)
-//                    System.out.println(rs.getString("question"));
-//                else if (rs.getInt("hasAnswer") == 0)
-//                    System.out.println("Is it " + rs.getString("question") + "?");
-//            }
 
 
         } catch (SQLException e) {
@@ -314,7 +302,7 @@ public class Main {
         Scanner cin = new Scanner(System.in);
         System.out.printf("Please insert the answer you were looking for: ");
         String answer = cin.nextLine();
-        System.out.printf("Now a question in the form \"Is it...\" [Example: Is it wet?]:");
+        System.out.printf("Now a question in the form \"Is it.../Does it...\" [Example: Is it wet?]:");
         String question = cin.nextLine();
 
         int qId = demo.getNumberOfEntries()+1;
@@ -334,46 +322,53 @@ public class Main {
 
 
     public static void main(String[] args) {
+        Scanner cin = new Scanner(System.in);
         //createNewDatabase("test.db");
         //createNewTable();
+
+        String choice = "yes";
         Main demo = new Main();
-        recursiveTest(0, 0, true, demo);
+        while(choice.equals("yes")) {
+            System.out.println("\n\t\t\t[Welcome to 20+ Questions]\n>> Think about a person/thing and I will try to guess it <<\n");
+            recursiveTest(0, 0, true, demo);
 
+            System.out.printf("\n\n> Do you want to play again? [Yes/No]: ");
+            choice = cin.nextLine();
+            choice=choice.toLowerCase();
+        }
         //demo.deleteAll();
-        //demo.update(1, 1, 4,3, "Is it a guy?");
-        //demo.update(4, 1, 5,6, "Is it Salvadorian");
-
-//        demo.insert(0, 1,1,2,"Is it a guy?");
-//        demo.insert(1, 0,0,0,"Diego");
-//        demo.insert(2, 0,0,0,"Adriana");
-
-        System.out.println("Id\tQ/A\tY\tN\tQuestion");
-        demo.selectAll();
+        //System.out.println("Id\tQ/A\tY\tN\tQuestion");
+        //demo.selectAll();
     }
 
     public static void recursiveTest(int nodeId, int parentId, boolean parentYes,Main demo){
         Scanner cin = new Scanner(System.in);
 
+        if(demo.getNumberOfEntries() == 0){
+            firstMenu(demo);
+            System.out.println("\n");
+        }
+
         //If it is a leaf
         if(demo.isItLeaf(nodeId)){
-            System.out.printf("Is it "+ demo.getQuestion(nodeId) + "?");
+            System.out.printf("Is it "+ demo.getQuestion(nodeId) + "?: ");
             String answer = cin.nextLine();
-
+            answer=answer.toLowerCase();
             //If leaf and yes, computer wins
             if(answer.equals("yes")){
-                System.out.println("I win");
+                System.out.println("\n>> I win! <<");
                 return;
             }
             else if(answer.equals("no")){
-                //TODO: Add new entry
-                System.out.println("Add entry:");
+                System.out.println("\nI lost :(\n[Add entry]");
                 addEntry(nodeId, parentId, parentYes, demo);
                 return;
             }
         }
 
-        System.out.println(demo.getQuestion(nodeId));
+        System.out.printf("%s %s",demo.getQuestion(nodeId), ": ");
         String answer = cin.nextLine();
+        answer=answer.toLowerCase();
 
         if(answer.equals("yes")){
             int nextId = demo.getNextYesNode(nodeId);
@@ -391,11 +386,17 @@ public class Main {
         Scanner cin = new Scanner(System.in);
         System.out.println("Please enter the first answer: ");
         String answer = cin.nextLine();
-        System.out.println("Please enter the questions to \" "+ answer +" \": ");
+        System.out.println("Please enter the opposite of: "+ answer +": ");
+        String noAnswer = cin.nextLine();
+        System.out.println("Please enter the question to \" "+ answer +" \" in the form [Is it.../Does it...] ");
         String question = cin.nextLine();
-        demo.update(1,1,2,0,question);
-        demo.update(2,0,0,0,answer);
+
+        demo.insert(0,1,1,2,question);
+        demo.insert(1,0,0,0,answer);
+        demo.insert(2,0,0,0,noAnswer);
         demo.selectAll();
+
+        return;
 
     }
 }
