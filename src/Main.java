@@ -329,7 +329,8 @@ public class Main {
         String choice = "yes";
         Main demo = new Main();
         while(choice.equals("yes")) {
-            System.out.println("\n\t\t\t[Welcome to 20+ Questions]\n>> Think about a person/thing and I will try to guess it <<\n");
+            System.out.println("\n\t\t\t[Welcome to 20+ Questions]\n>> Think about a person/thing and I will try to guess it <<");
+            System.out.println("Answer [Yes/No]:");
             recursiveTest(0, 0, true, demo);
 
             System.out.printf("\n\n> Do you want to play again? [Yes/No]: ");
