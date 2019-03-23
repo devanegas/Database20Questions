@@ -2,7 +2,7 @@ import java.sql.*;
 import java.util.Scanner;
 
 public class Main {
-
+    public static int id = 3;
     /*public static void createNewDatabase(String fileName) {
 
         String url = "jdbc:sqlite:C:/Users/diego.vanegaszuniga/IdeaProjects/Database20Questions" + fileName;
@@ -67,6 +67,20 @@ public class Main {
         }
     }
 
+
+    public void deleteAll(){
+        String sql = "DELETE FROM Tree";
+
+        try (Connection conn = this.connect();
+             Statement stmt  = conn.createStatement();
+             ResultSet rs    = stmt.executeQuery(sql)){
+
+            // loop through the result set
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
     public void update(int id, int hasAnswer, int yes, int no, String question) {
         String sql = "UPDATE Tree SET hasAnswer = ? , "
                 + "yes = ? , "
@@ -112,7 +126,7 @@ public class Main {
         }
     }
 
-    public void getNextYesNode(int currNode){
+    public int getNextYesNode(int currNode){
 
         int yesNode = 0;
         String sql = "SELECT yes "
@@ -130,13 +144,6 @@ public class Main {
                 yesNode = rs.getInt("yes");
             }
 
-
-            // TODO:loop through the result set
-//            while (rs.next()) {
-//                System.out.println(rs.getInt("id") +  "\t" +
-//                        rs.getString("name") + "\t" +
-//                        rs.getDouble("capacity"));
-//            }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -153,11 +160,38 @@ public class Main {
             //
             ResultSet rs  = pstmt.executeQuery();
 
+//            while(rs.next()) {
+//                if (rs.getInt("hasAnswer") == 1)
+//                    System.out.println(rs.getString("question"));
+//                else if (rs.getInt("hasAnswer") == 0)
+//                    System.out.println("Is it " + rs.getString("question") + "?");
+//            }
+
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return yesNode;
+
+    }
+
+    public String getQuestion(int root){
+
+        String noNode = null;
+        String sql = "SELECT question "
+                + "FROM Tree WHERE id = ?";
+
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt  = conn.prepareStatement(sql)){
+
+            // set the value
+            pstmt.setInt(1,root);
+            //
+            ResultSet rs  = pstmt.executeQuery();
+
             while(rs.next()) {
-                if (rs.getInt("hasAnswer") == 1)
-                    System.out.println(rs.getString("question"));
-                else if (rs.getInt("hasAnswer") == 0)
-                    System.out.println("Is it " + rs.getString("question") + "?");
+                noNode = rs.getString("question");
             }
 
 
@@ -165,12 +199,68 @@ public class Main {
             System.out.println(e.getMessage());
         }
 
-
-
+        return noNode;
     }
 
+    public boolean isItLeaf(int nodeId){
 
-    public void getNextNoNode(int currNode){
+        int hasAnswer = -1;
+        String sql = "SELECT hasAnswer "
+                + "FROM Tree WHERE id = ?";
+
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt  = conn.prepareStatement(sql)){
+
+            // set the value
+            pstmt.setInt(1,nodeId);
+            //
+            ResultSet rs  = pstmt.executeQuery();
+
+            while(rs.next()) {
+                hasAnswer = rs.getInt("hasAnswer");
+            }
+
+            //System.out.println(hasAnswer);
+
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        if(hasAnswer == 0){
+            return true;
+        }else if(hasAnswer == 1){
+            return false;
+        }
+        else{
+            System.out.println("ERROR!!!!!");
+            return true;
+        }
+    }
+
+    public int getNumberOfEntries(){
+        int numberOfIds =0;
+        String sql = "SELECT count(*) as total "
+                + "FROM Tree";
+
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt  = conn.prepareStatement(sql)){
+
+            ResultSet rs  = pstmt.executeQuery();
+
+
+            while(rs.next()) {
+                numberOfIds = rs.getInt("total");
+            }
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return numberOfIds;
+    }
+
+    public int getNextNoNode(int currNode){
 
         int noNode = 0;
         String sql = "SELECT no "
@@ -188,13 +278,6 @@ public class Main {
                 noNode = rs.getInt("no");
             }
 
-
-            // TODO:loop through the result set
-//            while (rs.next()) {
-//                System.out.println(rs.getInt("id") +  "\t" +
-//                        rs.getString("name") + "\t" +
-//                        rs.getDouble("capacity"));
-//            }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -211,12 +294,12 @@ public class Main {
             //
             ResultSet rs  = pstmt.executeQuery();
 
-            while(rs.next()) {
-                if (rs.getInt("hasAnswer") == 1)
-                    System.out.println(rs.getString("question"));
-                else if (rs.getInt("hasAnswer") == 0)
-                    System.out.println("Is it " + rs.getString("question") + "?");
-            }
+//            while(rs.next()) {
+//                if (rs.getInt("hasAnswer") == 1)
+//                    System.out.println(rs.getString("question"));
+//                else if (rs.getInt("hasAnswer") == 0)
+//                    System.out.println("Is it " + rs.getString("question") + "?");
+//            }
 
 
         } catch (SQLException e) {
@@ -224,27 +307,84 @@ public class Main {
         }
 
 
+        return noNode;
+    }
+
+    public static void addEntry(int no, int parentId, boolean parentYes,Main demo){
+        Scanner cin = new Scanner(System.in);
+        System.out.printf("Please insert the answer you were looking for: ");
+        String answer = cin.nextLine();
+        System.out.printf("Now a question in the form \"Is it...\" [Example: Is it wet?]:");
+        String question = cin.nextLine();
+
+        int qId = demo.getNumberOfEntries()+1;
+        int aId = demo.getNumberOfEntries()+2;
+        demo.insert(qId, 1, aId, no, question);
+        demo.insert(aId, 0, 0, 0, answer);
+
+        if(parentYes){
+            demo.update(parentId, 1, qId, demo.getNextNoNode(parentId), demo.getQuestion(parentId));
+        }
+        else if(!parentYes){
+            demo.update(parentId, 1, demo.getNextYesNode(parentId), qId, demo.getQuestion(parentId));
+        }
+
 
     }
 
-    /**
-     * @param args the command line arguments
-     */
+
     public static void main(String[] args) {
         //createNewDatabase("test.db");
         //createNewTable();
         Main demo = new Main();
+        recursiveTest(0, 0, true, demo);
 
-        //demo.insert(1,1,2,3, "Dog");
+        //demo.deleteAll();
+        //demo.update(1, 1, 4,3, "Is it a guy?");
+        //demo.update(4, 1, 5,6, "Is it Salvadorian");
+
+//        demo.insert(0, 1,1,2,"Is it a guy?");
+//        demo.insert(1, 0,0,0,"Diego");
+//        demo.insert(2, 0,0,0,"Adriana");
+
+        System.out.println("Id\tQ/A\tY\tN\tQuestion");
         demo.selectAll();
-//        demo.update(1,0,3,5,"Cat");
-//        demo.selectAll();
-        //firstMenu(demo);
-
-        //demo.update(1,1,2,3, "Is it a guy?");
-        demo.getNextYesNode(1);
-        demo.getNextNoNode(1);
     }
+
+    public static void recursiveTest(int nodeId, int parentId, boolean parentYes,Main demo){
+        Scanner cin = new Scanner(System.in);
+
+        //If it is a leaf
+        if(demo.isItLeaf(nodeId)){
+            System.out.printf("Is it "+ demo.getQuestion(nodeId) + "?");
+            String answer = cin.nextLine();
+
+            //If leaf and yes, computer wins
+            if(answer.equals("yes")){
+                System.out.println("I win");
+                return;
+            }
+            else if(answer.equals("no")){
+                //TODO: Add new entry
+                System.out.println("Add entry:");
+                addEntry(nodeId, parentId, parentYes, demo);
+                return;
+            }
+        }
+
+        System.out.println(demo.getQuestion(nodeId));
+        String answer = cin.nextLine();
+
+        if(answer.equals("yes")){
+            int nextId = demo.getNextYesNode(nodeId);
+            recursiveTest(nextId, nodeId, true,demo);
+        }
+        else if( answer.equals("no")) {
+            int nextId = demo.getNextNoNode(nodeId);
+            recursiveTest(nextId, nodeId, false,demo);
+        }
+    }
+
 
 
     public static void firstMenu(Main demo){
