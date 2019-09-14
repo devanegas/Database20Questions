@@ -1,11 +1,116 @@
+import java.io.File;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+import java.util.Vector;
 
 public class Main {
     public static int id = 3;
-    /*public static void createNewDatabase(String fileName) {
+    public static String dbName = "dataBase.db";
+    public static String path = "jdbc:sqlite:C:/Users/diego.vanegaszuniga/Desktop/Database20Questions/";
+    public static String directory = "C:/Users/diego.vanegaszuniga/Desktop/Database20Questions/";
 
-        String url = "jdbc:sqlite:C:/Users/diego.vanegaszuniga/IdeaProjects/Database20Questions" + fileName;
+    public static void main(String[] args) {
+        Scanner cin = new Scanner(System.in);
+
+        //Setup of the databases
+        setup();
+
+        //Driver
+        String choice = "yes";
+        Main demo = new Main();
+        System.out.println("\n [Your database currently looks like this]\n");
+        System.out.println("Id\tQ/A\tY\tN\tQuestion");
+        demo.selectAll();
+
+
+        while(choice.equals("yes")) {
+            System.out.println("\n\t\t\t[Welcome to 20+ Questions]\n>> Think about a person/thing and I will try to guess it <<");
+            System.out.println("Answer [Yes/No]:");
+            recursiveTest(0, 0, true, demo);
+
+            System.out.printf("\n\n> Do you want to play again? [Yes/No]: ");
+            choice = cin.nextLine();
+            choice=choice.toLowerCase();
+        }
+        //demo.deleteAll();
+        //System.out.println("Id\tQ/A\tY\tN\tQuestion");
+        //demo.selectAll();
+    }
+
+    public static void setup(){
+        Scanner cin = new Scanner(System.in);
+
+        //Start of program
+        System.out.print("Do you want to create a new data base? [Yes/No]: ");
+
+        String choice = cin.nextLine();
+        choice=choice.toLowerCase();
+
+
+        if(choice.equals("no")){
+            List<String> files;
+            files = getDbNames();
+
+            if(files.size() == 0){
+                System.out.println("There are no databases! Create a name for your first database: ");
+                dbName = cin.nextLine() + ".db";
+                files.add(dbName);
+                createNewTable();
+            }
+
+            System.out.println(" [Databases] ");
+            for(String file : files){
+                System.out.println("> " + file.substring(0, file.lastIndexOf('.')));
+            }
+
+            System.out.print("Choose the name of a database: ");
+
+            dbName = cin.nextLine() + ".db";
+            File f = new File(dbName);
+            while(!f.isFile()){
+                System.out.print("Invalid Database. Choose again: ");
+                dbName = cin.nextLine() + ".db";
+                f = new File(dbName);
+            }
+
+            System.out.println("DONE: USING ALREADY EXISTING DATABASE");
+        }
+        else if(choice.equals("yes")){
+
+            System.out.print("Insert the name of the database: ");
+            dbName = cin.nextLine() + ".db";
+
+            File file = new File(dbName);
+            while(file.exists() == true){
+                System.out.print("[ Name already exists! ] Choose another one:  ");
+                dbName = cin.nextLine() + ".db";
+                file = new File(dbName);
+            }
+
+            createNewTable();
+
+        }
+    }
+
+    public static List<String> getDbNames(){
+        File[] files = new File(directory).listFiles();
+        List<String> listOfFiles = new ArrayList<String>();
+
+        for(File file : files){
+            if(file.isFile() && file.getName().substring(file.getName().lastIndexOf('.')).equals(".db")){
+                listOfFiles.add(file.getName());
+            }
+        }
+
+        return listOfFiles;
+    }
+
+
+    public static void createNewDatabase(String fileName) {
+
+        String url = path + fileName;
 
         try (Connection conn = DriverManager.getConnection(url)) {
             if (conn != null) {
@@ -17,7 +122,7 @@ public class Main {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-    }*/
+    }
 
     public void insert(int id, int hasAnswer, int yes, int no, String question) {
         String sql = "INSERT INTO Tree(id,hasAnswer, yes, no, question) VALUES(?,?,?,?,?)";
@@ -37,7 +142,7 @@ public class Main {
 
     private Connection connect() {
         // SQLite connection string
-        String url = "jdbc:sqlite:C:/Users/diego.vanegaszuniga/IdeaProjects/Database20Questions/tests.db";
+        String url = path + dbName;
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(url);
@@ -106,7 +211,7 @@ public class Main {
 
     public static void createNewTable() {
         // SQLite connection string
-        String url = "jdbc:sqlite:C:/Users/diego.vanegaszuniga/IdeaProjects/Database20Questions/tests.db";
+        String url = path + dbName;
 
         // SQL statement for creating a new table
         String sql = "CREATE TABLE IF NOT EXISTS Tree (\n"
@@ -321,26 +426,6 @@ public class Main {
     }
 
 
-    public static void main(String[] args) {
-        Scanner cin = new Scanner(System.in);
-        //createNewDatabase("test.db");
-        //createNewTable();
-
-        String choice = "yes";
-        Main demo = new Main();
-        while(choice.equals("yes")) {
-            System.out.println("\n\t\t\t[Welcome to 20+ Questions]\n>> Think about a person/thing and I will try to guess it <<");
-            System.out.println("Answer [Yes/No]:");
-            recursiveTest(0, 0, true, demo);
-
-            System.out.printf("\n\n> Do you want to play again? [Yes/No]: ");
-            choice = cin.nextLine();
-            choice=choice.toLowerCase();
-        }
-        //demo.deleteAll();
-        //System.out.println("Id\tQ/A\tY\tN\tQuestion");
-        //demo.selectAll();
-    }
 
     public static void recursiveTest(int nodeId, int parentId, boolean parentYes,Main demo){
         Scanner cin = new Scanner(System.in);
@@ -395,7 +480,7 @@ public class Main {
         demo.insert(0,1,1,2,question);
         demo.insert(1,0,0,0,answer);
         demo.insert(2,0,0,0,noAnswer);
-        demo.selectAll();
+
 
         return;
 
